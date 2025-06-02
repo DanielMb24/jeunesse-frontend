@@ -171,7 +171,7 @@
         doc.text(`Programme : 24h dans Sa présence`, 20, y); y += lh;
 
         // Génération du QR code
-        const eventUrl = "https://exemple.com/evenement-grande-retraite"; // Modifie ce lien vers ta page événement
+        const eventUrl = "evenement.html"; 
         const qrDataUrl = await generateQRCodeDataURL(eventUrl);
 
         if (qrDataUrl) {
