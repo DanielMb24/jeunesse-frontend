@@ -3,322 +3,328 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Génération Ticket PDF</title>
+  <title>Grande Retraite des Jeunes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #ffffff; /* fond blanc */
-      color: #333333; /* texte gris foncé pour bonne lisibilité */
-      margin: 20px;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #6b46c1, #3182ce);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
     }
-    h1 {
-      color: #4a3f8e; /* violet foncé */
-      text-align: center;
+    form, #previewContainer {
+      background-color: #ffffff;
     }
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-      color: #4a3f8e;
+    /* Pour l'affichage du preview avec photo à droite */
+    #previewContent {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
     }
-    input[type="text"],
-    select {
-      width: 300px;
-      padding: 8px;
+    #previewInfo {
+      flex: 1;
+    }
+    #previewPhoto {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-      margin-top: 5px;
-    }
-    input[type="file"] {
-      margin-top: 5px;
-    }
-    button {
-      margin-top: 20px;
-      background-color: #6b46c1; /* violet */
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #553c9a; /* violet plus foncé */
-    }
-    #preview-container {
-      margin-top: 30px;
-      padding: 15px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      background-color: #f9f9f9; /* léger gris clair pour contraste */
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #preview-container.hidden {
-      display: none;
-    }
-    #preview-container img {
-      max-width: 150px;
-      max-height: 150px;
-      display: block;
-      margin-top: 15px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <h1>Génération de Ticket PDF</h1>
 
-  <form id="form-ticket">
-    <label for="nom">Nom :</label>
-    <input type="text" id="nom" name="nom" required />
-
-    <label for="quartier">Quartier :</label>
-    <input type="text" id="quartier" name="quartier" />
-
-    <label for="numero">Téléphone :</label>
-    <input type="text" id="numero" name="numero" />
-
-    <label for="presence">Présence :</label>
-    <select id="presence" name="presence" required>
-      <option value="Présent">Présent</option>
-      <option value="Absent">Absent</option>
-      <option value="Invité">Invité</option>
-    </select>
-
-    <label for="photo">Photo (JPEG/PNG) :</label>
-    <input type="file" id="photo" name="photo" accept="image/jpeg, image/png" />
-
-    <button type="submit">Générer le PDF</button>
-  </form>
-
-  <div id="preview-container" class="hidden">
-    <h2>Aperçu :</h2>
-    <div id="preview-text"></div>
-    <img id="preview-photo" src="" alt="Photo sélectionnée" />
+  <!-- En-tête avec logo et infos -->
+  <div class="w-full max-w-4xl flex items-center bg-white rounded-lg p-4 mb-10 shadow-lg">
+    <img src="logo.jpg" alt="Logo MEYINHA" id="logoImg" class="h-16 mr-6 object-contain" />
+    <div class="flex flex-col space-y-1">
+      <span class="font-bold text-lg text-purple-800">MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)</span>
+      <span class="text-md text-purple-700 tracking-wide">L'ÉGLISE LOCALE D’AKANDA</span>
+      <span class="text-md text-purple-700 tracking-wide">DÉPARTEMENT JEUNESSE</span>
+    </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-  // Compte à rebours
-  function updateCountdown() {
-    const countdownEl = document.getElementById("countdown");
-    const now = new Date();
-    const target = new Date();
-    target.setHours(17, 0, 0, 0);
-    const day = target.getDay();
-    if (day !== 0 || now >= target) {
-      const daysUntilSunday = (7 - day) % 7 || 7;
-      target.setDate(now.getDate() + daysUntilSunday);
-    }
-    const diff = target - now;
-    if (diff <= 0) {
-      countdownEl.textContent = "La retraite est en cours ou terminée.";
-      return;
-    }
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-    countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
-  }
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
+  <h1 class="text-white text-3xl font-bold mb-8 text-center">24h dans sa présence - Grande Retraite des Jeunes</h1>
 
-  const previewContainer = document.getElementById("previewContainer");
-  const previewInfo = document.getElementById("previewInfo");
-  const previewPhoto = document.getElementById("previewPhoto");
-  const downloadBtn = document.getElementById("downloadBtn");
+  <!-- Compte à rebours -->
+  <div id="countdown" class="text-white text-4xl font-mono mb-10"></div>
 
-  // Lire une image fichier en base64
-  function readFileAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = e => reject(e);
-      reader.readAsDataURL(file);
+  <!-- Formulaire d'inscription -->
+  <form id="inscriptionForm" class="p-8 rounded-lg shadow-lg max-w-md w-full space-y-6">
+    <h2 class="text-xl font-semibold mb-4 text-center text-purple-700">Inscription</h2>
+
+    <input type="text" name="nom" placeholder="Nom complet" required class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
+    <input type="text" name="quartier" placeholder="Quartier" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
+    <input type="tel" name="numero" placeholder="Numéro de téléphone" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
+
+    <div>
+      <label class="font-semibold block mb-1 text-purple-700">Confirmer votre présence :</label>
+      <label class="inline-flex items-center mr-6">
+        <input type="radio" name="presence" value="Confirmée" required class="form-radio" />
+        <span class="ml-2">Oui</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="radio" name="presence" value="Non" class="form-radio" />
+        <span class="ml-2">Non</span>
+      </label>
+    </div>
+
+    <div>
+      <label for="photo" class="font-semibold block mb-1 text-purple-700">Photo (optionnelle) :</label>
+      <input type="file" id="photo" name="photo" accept="image/*" class="w-full" />
+    </div>
+
+    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded font-semibold hover:bg-purple-700 transition">
+      Aperçu du ticket
+    </button>
+  </form>
+
+  <!-- Aperçu du ticket -->
+  <div id="previewContainer" class="hidden mt-10 p-6 rounded-lg shadow-lg max-w-xl w-full text-gray-800">
+    <div class="flex items-center mb-4">
+      <img src="logo.jpg" alt="Logo MEYINHA" class="h-14 mr-4 object-contain" />
+      <div>
+        <p class="font-bold text-purple-800">MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)</p>
+        <p class="text-purple-700 text-sm">L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE</p>
+      </div>
+    </div>
+
+    <h3 class="text-lg font-bold text-center mb-4 text-purple-700">Ticket - Grande Retraite des Jeunes</h3>
+    <div id="previewContent">
+      <div id="previewInfo" class="text-sm space-y-1"></div>
+      <img id="previewPhoto" alt="Photo du participant" src="" class="hidden" />
+    </div>
+
+    <div class="text-center mt-6">
+      <button id="downloadBtn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+        Télécharger le ticket PDF
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Compte à rebours
+    function updateCountdown() {
+      const countdownEl = document.getElementById("countdown");
+      const now = new Date();
+      const target = new Date();
+      target.setHours(17, 0, 0, 0);
+      const day = target.getDay();
+      if (day !== 0 || now >= target) {
+        const daysUntilSunday = (7 - day) % 7 || 7;
+        target.setDate(now.getDate() + daysUntilSunday);
+      }
+      const diff = target - now;
+      if (diff <= 0) {
+        countdownEl.textContent = "La retraite est en cours ou terminée.";
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    const previewContainer = document.getElementById("previewContainer");
+    const previewInfo = document.getElementById("previewInfo");
+    const previewPhoto = document.getElementById("previewPhoto");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    // Lire une image fichier en base64
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(e);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      if (data.presence !== "Confirmée") {
+        alert("Veuillez confirmer votre présence pour générer un ticket.");
+        return;
+      }
+
+      // Gérer la photo
+      let photoDataUrl = "";
+      const photoFile = formData.get("photo");
+      if (photoFile && photoFile.size > 0) {
+        photoDataUrl = await readFileAsDataURL(photoFile);
+      }
+
+      // Mise à jour du preview
+      previewInfo.innerHTML = `
+        <p><strong>Nom :</strong> ${data.nom}</p>
+        <p><strong>Quartier :</strong> ${data.quartier || "-"}</p>
+        <p><strong>Téléphone :</strong> ${data.numero || "-"}</p>
+        <p><strong>Présence :</strong> ${data.presence}</p>
+        <p><strong>Lieu :</strong> Route-stade, en face du CES d'Avorbam</p>
+        <p><strong>Date :</strong> Dimanche 16h00 à Lundi 17h00</p>
+        <p><strong>Programme :</strong> 24h dans Sa présence</p>
+      `;
+
+      if(photoDataUrl){
+        previewPhoto.src = photoDataUrl;
+        previewPhoto.classList.remove("hidden");
+      } else {
+        previewPhoto.src = "";
+        previewPhoto.classList.add("hidden");
+      }
+
+      previewContainer.classList.remove("hidden");
+
+      // Génération PDF quand on clique
+      downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
     });
-  }
 
-  document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-
-    if (data.presence !== "Confirmée") {
-      alert("Veuillez confirmer votre présence pour générer un ticket.");
-      return;
-    }
-
-    // Gérer la photo
-    let photoDataUrl = "";
-    const photoFile = formData.get("photo");
-    if (photoFile && photoFile.size > 0) {
-      photoDataUrl = await readFileAsDataURL(photoFile);
-    }
-
-    // Mise à jour du preview
-    previewInfo.innerHTML = `
-      <p><strong>Nom :</strong> ${data.nom}</p>
-      <p><strong>Quartier :</strong> ${data.quartier || "-"}</p>
-      <p><strong>Téléphone :</strong> ${data.numero || "-"}</p>
-      <p><strong>Présence :</strong> ${data.presence}</p>
-      <p><strong>Lieu :</strong> Route-stade, en face du CES d'Avorbam</p>
-      <p><strong>Date :</strong> Dimanche 16h00 à Lundi 17h00</p>
-      <p><strong>Programme :</strong> 24h dans Sa présence</p>
-    `;
-
-    if(photoDataUrl){
-      previewPhoto.src = photoDataUrl;
-      previewPhoto.classList.remove("hidden");
-    } else {
-      previewPhoto.src = "";
-      previewPhoto.classList.add("hidden");
-    }
-
-    previewContainer.classList.remove("hidden");
-
-    // Génération PDF quand on clique
-    downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
-  });
-
-  function generatePdf(data, photoDataUrl) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
-    });
-
-    // Marges
-    const marginLeft = 40;
-    const marginTop = 40;
-    let y = marginTop;
-
-    // Logo
-    const logo = new Image();
-    logo.src = "logo.jpg";
-    logo.onload = () => {
-      doc.addImage(logo, "JPEG", marginLeft, y, 100, 50);
-
-      y += 60;
-
-      // Texte en haut
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor("#6B46C1");
-      doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
-      y += 18;
-      doc.setFontSize(12);
-      doc.setTextColor("#553C9A");
-      doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
-      y += 30;
-
-      // Titre
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor("#6B46C1");
-      doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
-      y += 30;
-
-      // Infos texte
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor("#000000");
-
-      const leftX = marginLeft;
-      const rightX = 320; // place image à droite
-
-      const lineHeight = 18;
-
-      // Texte colonne gauche
-      const lines = [
-        `Nom : ${data.nom}`,
-        `Quartier : ${data.quartier || "-"}`,
-        `Téléphone : ${data.numero || "-"}`,
-        `Présence : ${data.presence}`,
-        `Lieu : Route-stade, en face du CES d'Avorbam`,
-        `Date : Dimanche 16h00 à Lundi 17h00`,
-        `Programme : 24h dans Sa présence`
-      ];
-
-      lines.forEach((line, idx) => {
-        doc.text(line, leftX, y + idx * lineHeight);
+    function generatePdf(data, photoDataUrl) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
       });
 
-      // Image à droite si présente
-      if (photoDataUrl) {
-        const img = new Image();
-        img.src = photoDataUrl;
-        img.onload = () => {
-          doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+      // Marges
+      const marginLeft = 40;
+      const marginTop = 40;
+      let y = marginTop;
+
+      // Logo
+      const logo = new Image();
+      logo.src = "logo.jpg";
+      logo.onload = () => {
+        doc.addImage(logo, "JPEG", marginLeft, y, 100, 50);
+
+        y += 60;
+
+        // Texte en haut
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor("#6B46C1");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
+        y += 18;
+        doc.setFontSize(12);
+        doc.setTextColor("#553C9A");
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
+        y += 30;
+
+        // Titre
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor("#6B46C1");
+        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
+        y += 30;
+
+        // Infos texte
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor("#000000");
+
+        const leftX = marginLeft;
+        const rightX = 320; // place image à droite
+
+        const lineHeight = 18;
+
+        // Texte colonne gauche
+        const lines = [
+          `Nom : ${data.nom}`,
+          `Quartier : ${data.quartier || "-"}`,
+          `Téléphone : ${data.numero || "-"}`,
+          `Présence : ${data.presence}`,
+          `Lieu : Route-stade, en face du CES d'Avorbam`,
+          `Date : Dimanche 16h00 à Lundi 17h00`,
+          `Programme : 24h dans Sa présence`
+        ];
+
+        lines.forEach((line, idx) => {
+          doc.text(line, leftX, y + idx * lineHeight);
+        });
+
+        // Image à droite si présente
+        if (photoDataUrl) {
+          const img = new Image();
+          img.src = photoDataUrl;
+          img.onload = () => {
+            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+          img.onerror = () => {
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+        } else {
           doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        };
-        img.onerror = () => {
+        }
+      };
+      logo.onerror = () => {
+        // Si logo non chargé, on continue sans
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor("#6B46C1");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
+        y += 18;
+        doc.setFontSize(12);
+        doc.setTextColor("#553C9A");
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
+        y += 30;
+
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor("#6B46C1");
+        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
+        y += 30;
+
+        const leftX = marginLeft;
+        const rightX = 320;
+
+        const lineHeight = 18;
+
+        const lines = [
+          `Nom : ${data.nom}`,
+          `Quartier : ${data.quartier || "-"}`,
+          `Téléphone : ${data.numero || "-"}`,
+          `Présence : ${data.presence}`,
+          `Lieu : Route-stade, en face du CES d'Avorbam`,
+          `Date : Dimanche 16h00 à Lundi 17h00`,
+          `Programme : 24h dans Sa présence`
+        ];
+
+        lines.forEach((line, idx) => {
+          doc.text(line, leftX, y + idx * lineHeight);
+        });
+
+        if(photoDataUrl){
+          const img = new Image();
+          img.src = photoDataUrl;
+          img.onload = () => {
+            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+          img.onerror = () => {
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+        } else {
           doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        };
-      } else {
-        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-      }
-    };
-    logo.onerror = () => {
-      // Si logo non chargé, on continue sans
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor("#6B46C1");
-      doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
-      y += 18;
-      doc.setFontSize(12);
-      doc.setTextColor("#553C9A");
-      doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
-      y += 30;
-
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor("#6B46C1");
-      doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
-      y += 30;
-
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor("#000000");
-
-      const leftX = marginLeft;
-      const rightX = 320;
-      const lineHeight = 18;
-
-      const lines = [
-        `Nom : ${data.nom}`,
-        `Quartier : ${data.quartier || "-"}`,
-        `Téléphone : ${data.numero || "-"}`,
-        `Présence : ${data.presence}`,
-        `Lieu : Route-stade, en face du CES d'Avorbam`,
-        `Date : Dimanche 16h00 à Lundi 17h00`,
-        `Programme : 24h dans Sa présence`
-      ];
-
-      lines.forEach((line, idx) => {
-        doc.text(line, leftX, y + idx * lineHeight);
-      });
-
-      if (photoDataUrl) {
-        const img = new Image();
-        img.src = photoDataUrl;
-        img.onload = () => {
-          doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        };
-        img.onerror = () => {
-          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        };
-      } else {
-        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-      }
-    };
-  }
-</script>
-
+        }
+      };
+    }
+  </script>
 </body>
 </html>
+ne change pas les infos concoorde juste les couleurs pour avoir un background blanc pour la page 
