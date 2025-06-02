@@ -62,7 +62,6 @@
   <!-- Formulaire d'inscription -->
 <form id="inscriptionForm" name="inscription" method="POST" data-netlify="true" enctype="multipart/form-data" class="p-8 rounded-lg shadow-lg max-w-3xl w-full bg-white space-y-6">
 
-
   <h2 class="text-2xl font-semibold mb-6 text-center text-purple-700">Formulaire d'inscription</h2>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -206,98 +205,138 @@
       downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
     });
 
-function generatePdf(data, photoDataUrl) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({
-    orientation: "portrait",
-    unit: "mm",
-    format: "a4",
-  });
+    function generatePdf(data, photoDataUrl) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
 
-  // Couleurs et styles
-  const primaryColor = "#5b2a9d";
-  const labelStyle = { fontSize: 11, textColor: "#555" };
-  const valueStyle = { fontSize: 13, fontStyle: "bold", textColor: "#000" };
+      // Marges
+      const marginLeft = 40;
+      const marginTop = 40;
+      const marginRigth = 40;
+      let y = marginTop;
 
-  let y = 20;
+      // Logo
+      const logo = new Image();
+      logo.src = "logo.jpg";
+      logo.onload = () => {
+        doc.addImage(logo, "JPEG", marginLeft, y, 100, 50);
 
-  // Logo
-  const logo = document.getElementById("logoImg");
-  if (logo) {
-    const canvas = document.createElement("canvas");
-    canvas.width = logo.width;
-    canvas.height = logo.height;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(logo, 0, 0);
-    const logoData = canvas.toDataURL("image/png");
-    doc.addImage(logoData, "PNG", 15, y, 30, 30);
-  }
+        y += 60;
 
-  // Titre
-  doc.setTextColor(primaryColor);
-  doc.setFontSize(18);
-  doc.setFont("helvetica", "bold");
-  doc.text("Grande Retraite des Jeunes", 105, y + 10, { align: "center" });
+        // Texte en haut
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor("#6B46C1");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginRigth, y);
+        y += 18;
+        doc.setFontSize(12);
+        doc.setTextColor("#553C9A");
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
+        y += 30;
 
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
-  doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", 105, y + 18, { align: "center" });
-  doc.text("Église Locale d’Akanda - Département Jeunesse", 105, y + 24, { align: "center" });
+        // Titre
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor("#6B46C1");
+        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
+        y += 30;
 
-  y += 40;
+        // Infos texte
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor("#000000");
 
-  // Encadré participant
-  doc.setDrawColor(150);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(15, y, 180, 120, 5, 5);
+        const leftX = marginLeft;
+        const rightX = 320; // place image à droite
 
-  // Photo à droite
-  if (photoDataUrl) {
-    doc.addImage(photoDataUrl, "JPEG", 155, y + 5, 35, 35);
-  }
+        const lineHeight = 18;
 
-  // Infos texte à gauche
-  const infoX = 20;
-  let lineY = y + 10;
+        // Texte colonne gauche
+        const lines = [
+          `Nom : ${data.nom}`,
+          `Quartier : ${data.quartier || "-"}`,
+          `Téléphone : ${data.numero || "-"}`,
+          `Présence : ${data.presence}`,
+          `Lieu : Route-stade, en face du CES d'Avorbam`,
+          `Date : Dimanche 16h00 à Lundi 17h00`,
+          `Programme : 24h dans Sa présence`
+        ];
 
-  const fields = [
-    ["Nom", data.nom],
-    ["Quartier", data.quartier || "-"],
-    ["Téléphone", data.numero || "-"],
-    ["Présence", data.presence],
-    ["Lieu", "Route-stade, en face du CES d'Avorbam"],
-    ["Date", "Dimanche 16h00 à Lundi 17h00"],
-    ["Programme", "24h dans Sa présence"]
-  ];
+        lines.forEach((line, idx) => {
+          doc.text(line, leftX, y + idx * lineHeight);
+        });
 
-  fields.forEach(([label, value]) => {
-    doc.setFontSize(labelStyle.fontSize);
-    doc.setTextColor(labelStyle.textColor);
-    doc.setFont("helvetica", "normal");
-    doc.text(`${label} :`, infoX, lineY);
+        // Image à droite si présente
+        if (photoDataUrl) {
+          const img = new Image();
+          img.src = photoDataUrl;
+          img.onload = () => {
+            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+          img.onerror = () => {
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+        } else {
+          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        }
+      };
+      logo.onerror = () => {
+        // Si logo non chargé, on continue sans
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor("#6B46C1");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
+        y += 18;
+        doc.setFontSize(12);
+        doc.setTextColor("#553C9A");
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
+        y += 30;
 
-    doc.setFontSize(valueStyle.fontSize);
-    doc.setTextColor(valueStyle.textColor);
-    doc.setFont("helvetica", valueStyle.fontStyle);
-    doc.text(`${value}`, infoX + 40, lineY);
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor("#6B46C1");
+        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
+        y += 30;
 
-    lineY += 10;
-  });
+        const leftX = marginLeft;
+        const rightX = 320;
 
-  // Pied de page
-  doc.setDrawColor(primaryColor);
-  doc.setLineWidth(0.2);
-  doc.line(15, 270, 195, 270);
-  doc.setFontSize(10);
-  doc.setTextColor("#888");
-  doc.text("Ticket généré automatiquement - MEYINHA Jeunesse", 105, 277, { align: "center" });
+        const lineHeight = 18;
 
-  // Téléchargement
-  doc.save(`ticket-${data.nom.replace(/\s+/g, "_").toLowerCase()}.pdf`);
-};
+        const lines = [
+          `Nom : ${data.nom}`,
+          `Quartier : ${data.quartier || "-"}`,
+          `Téléphone : ${data.numero || "-"}`,
+          `Présence : ${data.presence}`,
+          `Lieu : Route-stade, en face du CES d'Avorbam`,
+          `Date : Dimanche 16h00 à Lundi 17h00`,
+          `Programme : 24h dans Sa présence`
+        ];
 
+        lines.forEach((line, idx) => {
+          doc.text(line, leftX, y + idx * lineHeight);
+        });
+
+        if(photoDataUrl){
+          const img = new Image();
+          img.src = photoDataUrl;
+          img.onload = () => {
+            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+          img.onerror = () => {
+            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          };
+        } else {
+          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        }
+      };
     }
   </script>
 </body>
 </html>
-
