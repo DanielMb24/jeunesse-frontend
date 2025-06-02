@@ -6,6 +6,7 @@
   <title>Grande Retraite des Jeunes</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -86,18 +87,15 @@
         const daysUntilSunday = (7 - day) % 7 || 7;
         target.setDate(now.getDate() + daysUntilSunday);
       }
-
       const diff = target - now;
       if (diff <= 0) {
         countdownEl.textContent = "La retraite est en cours ou terminée.";
         return;
       }
-
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((diff / (1000 * 60)) % 60);
       const seconds = Math.floor((diff / 1000) % 60);
-
       countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
     }
     setInterval(updateCountdown, 1000);
@@ -120,7 +118,16 @@
       URL.revokeObjectURL(url);
     }
 
-    document.getElementById("inscriptionForm").addEventListener("submit", function (e) {
+    async function generateQRCodeDataURL(text) {
+      try {
+        return await QRCode.toDataURL(text, { margin: 1, width: 128 });
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
+    }
+
+    document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
@@ -142,8 +149,7 @@
 
       previewContainer.classList.remove("hidden");
 
-      // Attacher le téléchargement
-      downloadBtn.onclick = () => {
+      downloadBtn.onclick = async () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
@@ -163,6 +169,16 @@
         doc.text(`Lieu : Route-stade, en face du CES d'Avorbam`, 20, y); y += lh;
         doc.text(`Date : Dimanche 16h00 à Lundi 17h00`, 20, y); y += lh;
         doc.text(`Programme : 24h dans Sa présence`, 20, y); y += lh;
+
+        // Génération du QR code
+        const eventUrl = "https://exemple.com/evenement-grande-retraite"; // Modifie ce lien vers ta page événement
+        const qrDataUrl = await generateQRCodeDataURL(eventUrl);
+
+        if (qrDataUrl) {
+          // Ajouter l'image QR code au PDF
+          // x=150, y=20, largeur=40, hauteur=40 (ajuste si besoin)
+          doc.addImage(qrDataUrl, "PNG", 150, 20, 40, 40);
+        }
 
         doc.save(`Ticket_${data.nom.replace(/\s+/g, "_")}.pdf`);
         downloadJSON(data, `Inscription_${data.nom.replace(/\s+/g, "_")}.json`);
