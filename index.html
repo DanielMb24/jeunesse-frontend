@@ -71,7 +71,7 @@
 
     <div class="text-center mt-4">
       <button id="downloadBtn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
-        Télécharger le ticket PDF + JSON
+        Télécharger le ticket PDF 
       </button>
     </div>
   </div>
@@ -221,8 +221,9 @@
         doc.text(`Programme : 24h dans Sa présence`, 40, y);
 
         // Générer QR code pour URL / info
-        const qrText = `Nom: ${data.nom}, Retraite des Jeunes MEYINHA, Présence: ${data.presence}`;
-        const qrDataUrl = await generateQRCodeDataURL(qrText);
+      const urlEvent = "evenement.html";
+
+        const qrDataUrl = await generateQRCodeDataURL(urlEvent);
 
         // Ajouter QR code en bas à droite
         const qrSize = 100;
