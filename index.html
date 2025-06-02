@@ -101,187 +101,224 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    const form = document.getElementById("form-ticket");
-    const previewContainer = document.getElementById("preview-container");
-    const previewText = document.getElementById("preview-text");
-    const previewPhoto = document.getElementById("preview-photo");
+<script>
+  // Compte à rebours
+  function updateCountdown() {
+    const countdownEl = document.getElementById("countdown");
+    const now = new Date();
+    const target = new Date();
+    target.setHours(17, 0, 0, 0);
+    const day = target.getDay();
+    if (day !== 0 || now >= target) {
+      const daysUntilSunday = (7 - day) % 7 || 7;
+      target.setDate(now.getDate() + daysUntilSunday);
+    }
+    const diff = target - now;
+    if (diff <= 0) {
+      countdownEl.textContent = "La retraite est en cours ou terminée.";
+      return;
+    }
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
+  }
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+  const previewContainer = document.getElementById("previewContainer");
+  const previewInfo = document.getElementById("previewInfo");
+  const previewPhoto = document.getElementById("previewPhoto");
+  const downloadBtn = document.getElementById("downloadBtn");
 
-      const formData = new FormData(form);
-      const data = {
-        nom: formData.get("nom"),
-        quartier: formData.get("quartier"),
-        numero: formData.get("numero"),
-        presence: formData.get("presence"),
-      };
+  // Lire une image fichier en base64
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = e => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
 
-      let photoDataUrl = null;
+  document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
 
-      const photoFile = formData.get("photo");
-      if (photoFile && photoFile.size > 0) {
-        photoDataUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(photoFile);
-        });
-      }
+    if (data.presence !== "Confirmée") {
+      alert("Veuillez confirmer votre présence pour générer un ticket.");
+      return;
+    }
 
-      // Affichage preview texte
-      previewText.innerHTML = `
-        <p><strong>Nom :</strong> ${data.nom}</p>
-        <p><strong>Quartier :</strong> ${data.quartier || "-"}</p>
-        <p><strong>Téléphone :</strong> ${data.numero || "-"}</p>
-        <p><strong>Présence :</strong> ${data.presence}</p>
-      `;
+    // Gérer la photo
+    let photoDataUrl = "";
+    const photoFile = formData.get("photo");
+    if (photoFile && photoFile.size > 0) {
+      photoDataUrl = await readFileAsDataURL(photoFile);
+    }
 
-      if (photoDataUrl) {
-        previewPhoto.src = photoDataUrl;
-        previewPhoto.classList.remove("hidden");
-      } else {
-        previewPhoto.src = "";
-        previewPhoto.classList.add("hidden");
-      }
+    // Mise à jour du preview
+    previewInfo.innerHTML = `
+      <p><strong>Nom :</strong> ${data.nom}</p>
+      <p><strong>Quartier :</strong> ${data.quartier || "-"}</p>
+      <p><strong>Téléphone :</strong> ${data.numero || "-"}</p>
+      <p><strong>Présence :</strong> ${data.presence}</p>
+      <p><strong>Lieu :</strong> Route-stade, en face du CES d'Avorbam</p>
+      <p><strong>Date :</strong> Dimanche 16h00 à Lundi 17h00</p>
+      <p><strong>Programme :</strong> 24h dans Sa présence</p>
+    `;
 
-      previewContainer.classList.remove("hidden");
+    if(photoDataUrl){
+      previewPhoto.src = photoDataUrl;
+      previewPhoto.classList.remove("hidden");
+    } else {
+      previewPhoto.src = "";
+      previewPhoto.classList.add("hidden");
+    }
 
-      // Génération PDF quand on clique
-      generatePdf(data, photoDataUrl);
+    previewContainer.classList.remove("hidden");
+
+    // Génération PDF quand on clique
+    downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
+  });
+
+  function generatePdf(data, photoDataUrl) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "pt",
+      format: "a4",
     });
 
-    function generatePdf(data, photoDataUrl) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
+    // Marges
+    const marginLeft = 40;
+    const marginTop = 40;
+    let y = marginTop;
+
+    // Logo
+    const logo = new Image();
+    logo.src = "logo.jpg";
+    logo.onload = () => {
+      doc.addImage(logo, "JPEG", marginLeft, y, 100, 50);
+
+      y += 60;
+
+      // Texte en haut
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor("#6B46C1");
+      doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
+      y += 18;
+      doc.setFontSize(12);
+      doc.setTextColor("#553C9A");
+      doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
+      y += 30;
+
+      // Titre
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor("#6B46C1");
+      doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
+      y += 30;
+
+      // Infos texte
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor("#000000");
+
+      const leftX = marginLeft;
+      const rightX = 320; // place image à droite
+
+      const lineHeight = 18;
+
+      // Texte colonne gauche
+      const lines = [
+        `Nom : ${data.nom}`,
+        `Quartier : ${data.quartier || "-"}`,
+        `Téléphone : ${data.numero || "-"}`,
+        `Présence : ${data.presence}`,
+        `Lieu : Route-stade, en face du CES d'Avorbam`,
+        `Date : Dimanche 16h00 à Lundi 17h00`,
+        `Programme : 24h dans Sa présence`
+      ];
+
+      lines.forEach((line, idx) => {
+        doc.text(line, leftX, y + idx * lineHeight);
       });
 
-      // Marges
-      const marginLeft = 40;
-      const marginTop = 40;
-      let y = marginTop;
-
-      // Logo
-      const logo = new Image();
-      logo.src = "logo.jpg";
-      logo.onload = () => {
-        doc.addImage(logo, "JPEG", marginLeft, y, 100, 50);
-
-        y += 60;
-
-        // Texte en haut
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor("#4a3f8e"); // violet foncé
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
-        y += 18;
-        doc.setFontSize(12);
-        doc.setTextColor("#6b46c1"); // violet plus clair
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
-        y += 30;
-
-        // Titre
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor("#4a3f8e");
-        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
-        y += 30;
-
-        // Infos texte
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor("#333333"); // texte sombre
-
-        const leftX = marginLeft;
-        const rightX = 320; // place image à droite
-
-        const lineHeight = 18;
-
-        // Texte colonne gauche
-        const lines = [
-          `Nom : ${data.nom}`,
-          `Quartier : ${data.quartier || "-"}`,
-          `Téléphone : ${data.numero || "-"}`,
-          `Présence : ${data.presence}`,
-          `Lieu : Route-stade, en face du CES d'Avorbam`,
-          `Date : Dimanche 16h00 à Lundi 17h00`,
-          `Programme : 24h dans Sa présence`
-        ];
-
-        lines.forEach((line, idx) => {
-          doc.text(line, leftX, y + idx * lineHeight);
-        });
-
-        // Image à droite si présente
-        if (photoDataUrl) {
-          const img = new Image();
-          img.src = photoDataUrl;
-          img.onload = () => {
-            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-          img.onerror = () => {
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-        } else {
+      // Image à droite si présente
+      if (photoDataUrl) {
+        const img = new Image();
+        img.src = photoDataUrl;
+        img.onload = () => {
+          doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
           doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        }
-      };
-      logo.onerror = () => {
-        // Si logo non chargé, on continue sans
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor("#4a3f8e");
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
-        y += 18;
-        doc.setFontSize(12);
-        doc.setTextColor("#6b46c1");
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
-        y += 30;
-
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor("#4a3f8e");
-        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
-        y += 30;
-
-        const leftX = marginLeft;
-        const rightX = 320;
-
-        const lineHeight = 18;
-
-        const lines = [
-          `Nom : ${data.nom}`,
-          `Quartier : ${data.quartier || "-"}`,
-          `Téléphone : ${data.numero || "-"}`,
-          `Présence : ${data.presence}`,
-          `Lieu : Route-stade, en face du CES d'Avorbam`,
-          `Date : Dimanche 16h00 à Lundi 17h00`,
-          `Programme : 24h dans Sa présence`
-        ];
-
-        lines.forEach((line, idx) => {
-          doc.text(line, leftX, y + idx * lineHeight);
-        });
-
-        if(photoDataUrl){
-          const img = new Image();
-          img.src = photoDataUrl;
-          img.onload = () => {
-            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-          img.onerror = () => {
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-        } else {
+        };
+        img.onerror = () => {
           doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        }
-      };
-    }
-  </script>
+        };
+      } else {
+        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+      }
+    };
+    logo.onerror = () => {
+      // Si logo non chargé, on continue sans
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor("#6B46C1");
+      doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
+      y += 18;
+      doc.setFontSize(12);
+      doc.setTextColor("#553C9A");
+      doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
+      y += 30;
+
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor("#6B46C1");
+      doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
+      y += 30;
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor("#000000");
+
+      const leftX = marginLeft;
+      const rightX = 320;
+      const lineHeight = 18;
+
+      const lines = [
+        `Nom : ${data.nom}`,
+        `Quartier : ${data.quartier || "-"}`,
+        `Téléphone : ${data.numero || "-"}`,
+        `Présence : ${data.presence}`,
+        `Lieu : Route-stade, en face du CES d'Avorbam`,
+        `Date : Dimanche 16h00 à Lundi 17h00`,
+        `Programme : 24h dans Sa présence`
+      ];
+
+      lines.forEach((line, idx) => {
+        doc.text(line, leftX, y + idx * lineHeight);
+      });
+
+      if (photoDataUrl) {
+        const img = new Image();
+        img.src = photoDataUrl;
+        img.onload = () => {
+          doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        };
+        img.onerror = () => {
+          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        };
+      } else {
+        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+      }
+    };
+  }
+</script>
+
 </body>
 </html>
