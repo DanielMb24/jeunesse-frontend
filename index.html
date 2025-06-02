@@ -6,41 +6,76 @@
     <title>Grande Retraite des Jeunes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
-<body class="bg-gradient-to-r from-purple-600 to-blue-600 min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-gradient-to-tr from-purple-700 via-indigo-700 to-blue-800 min-h-screen flex flex-col items-center justify-center px-4 py-10">
 
-<h1 class="text-white text-3xl font-bold mb-8 text-center">24h dans sa présence - Grande Retraite des Jeunes</h1>
+<h1 class="text-white text-4xl md:text-5xl font-extrabold mb-12 text-center drop-shadow-lg">
+    24h dans sa présence<br> <span class="text-yellow-400">Grande Retraite des Jeunes</span>
+</h1>
 
-<div id="countdown" class="text-white text-4xl font-mono mb-10"></div>
+<div id="countdown" class="text-yellow-300 text-5xl font-mono mb-14 drop-shadow-md select-none"></div>
 
-<form id="inscriptionForm" class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-md w-full space-y-6">
-    <h2 class="text-xl font-semibold mb-4 text-center">Inscription & téléchargement du ticket</h2>
+<form id="inscriptionForm" class="bg-white bg-opacity-95 backdrop-blur-md shadow-xl rounded-3xl max-w-lg w-full p-10 space-y-8">
 
-    <input type="text" name="nom" placeholder="Nom complet" required
-           class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
+    <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">Inscription & téléchargement du ticket</h2>
 
-    <input type="text" name="quartier" placeholder="Quartier"
-           class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
-
-    <input type="tel" name="numero" placeholder="Numéro de téléphone"
-           class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
-
-    <div>
-        <label class="font-semibold block mb-1">Confirmer votre présence :</label>
-        <label class="inline-flex items-center mr-6">
-            <input type="radio" name="presence" value="Confirmée" required class="form-radio" />
-            <span class="ml-2">Oui</span>
-        </label>
-        <label class="inline-flex items-center">
-            <input type="radio" name="presence" value="Non" class="form-radio" />
-            <span class="ml-2">Non</span>
-        </label>
+    <!-- Champ Nom avec icône -->
+    <div class="relative">
+        <label for="nom" class="block mb-2 font-medium text-gray-700">Nom complet <span class="text-red-500">*</span></label>
+        <div class="flex items-center border border-gray-300 rounded-xl focus-within:ring-4 focus-within:ring-purple-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 15c2.432 0 4.688.676 6.622 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <input id="nom" name="nom" type="text" required
+                   class="w-full p-4 pl-2 rounded-r-xl focus:outline-none"
+                   placeholder="Ex: Pierre Daniel Bouka" />
+        </div>
     </div>
 
-    <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded font-semibold hover:bg-purple-700 transition">
-        Télécharger le ticket PDF & JSON
+    <!-- Champ Quartier avec icône -->
+    <div class="relative">
+        <label for="quartier" class="block mb-2 font-medium text-gray-700">Quartier</label>
+        <div class="flex items-center border border-gray-300 rounded-xl focus-within:ring-4 focus-within:ring-purple-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 12.414a4 4 0 10-5.656 5.656l4.243 4.243a8 8 0 0011.314-11.314 8 8 0 00-11.314 11.314z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <input id="quartier" name="quartier" type="text"
+                   class="w-full p-4 pl-2 rounded-r-xl focus:outline-none"
+                   placeholder="Ex: Akébé" />
+        </div>
+    </div>
+
+    <!-- Champ Numéro téléphone avec icône -->
+    <div class="relative">
+        <label for="numero" class="block mb-2 font-medium text-gray-700">Numéro de téléphone</label>
+        <div class="flex items-center border border-gray-300 rounded-xl focus-within:ring-4 focus-within:ring-purple-400 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h11M9 21v-6a2 2 0 00-2-2H4a2 2 0 00-2 2v6m7-6l3 3m0 0l3-3m-3 3V3" />
+            </svg>
+            <input id="numero" name="numero" type="tel"
+                   class="w-full p-4 pl-2 rounded-r-xl focus:outline-none"
+                   placeholder="+241 07 07 07 07" />
+        </div>
+    </div>
+
+    <fieldset class="space-y-3">
+        <legend class="font-semibold text-gray-800">Confirmer votre présence <span class="text-red-500">*</span></legend>
+        <label class="inline-flex items-center space-x-2 cursor-pointer">
+            <input type="radio" name="presence" value="Confirmée" required class="form-radio text-purple-600 w-5 h-5" />
+            <span class="text-gray-700 font-medium">Oui</span>
+        </label>
+        <label class="inline-flex items-center space-x-2 cursor-pointer">
+            <input type="radio" name="presence" value="Non" class="form-radio text-gray-400 w-5 h-5" />
+            <span class="text-gray-500 font-medium">Non</span>
+        </label>
+    </fieldset>
+
+    <button type="submit"
+            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl shadow-lg transition transform hover:-translate-y-1 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-purple-300">
+        Télécharger le ticket PDF
     </button>
+
 </form>
 
 <script>
@@ -50,47 +85,28 @@
         const now = new Date();
         const target = new Date(now);
         target.setHours(17, 0, 0, 0);
-
         const day = target.getDay();
         if (day !== 0 || now >= target) {
             const daysUntilSunday = (7 - day) % 7 || 7;
             target.setDate(now.getDate() + daysUntilSunday);
         }
-
         const diff = target - now;
         if (diff <= 0) {
             countdownEl.textContent = "La retraite est en cours ou terminée.";
             return;
         }
-
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
-
         countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
     }
     setInterval(updateCountdown, 1000);
     updateCountdown();
 
-    // Fonction pour télécharger un fichier JSON
-    function downloadJSON(data, filename) {
-        const jsonStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    }
-
-    // Soumission du formulaire
-    document.getElementById("inscriptionForm").addEventListener("submit", async function(e) {
+    // Soumission formulaire
+    document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
         e.preventDefault();
-
         const form = e.target;
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
@@ -101,6 +117,19 @@
         }
 
         try {
+            const res = await fetch("https://jeunesse-backend.onrender.com/inscription", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+            if (result.error) {
+                alert("Erreur serveur : " + result.error);
+                return;
+            }
+
+            // Génération PDF sans QR code
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.setFontSize(18);
@@ -119,24 +148,13 @@
             doc.setFontSize(10);
             doc.text("Dimanche 16h00 jusqu'au Lundi 17h00", 20, y); y += lh * 2;
 
-            // Générer QR code dans un canvas
-            const canvas = document.createElement("canvas");
-            await QRCode.toCanvas(canvas, JSON.stringify(data), { width: 100 });
-            const qrUrl = canvas.toDataURL("image/png");
-            doc.addImage(qrUrl, "PNG", 150, 40, 40, 40);
-
-            // Télécharger PDF
             doc.save(`Ticket_${data.nom.replace(/\s+/g, "_")}.pdf`);
 
-            // Télécharger JSON
-            downloadJSON(data, `Inscription_${data.nom.replace(/\s+/g, "_")}.json`);
-
-            alert("Ticket PDF et fichier JSON générés avec succès !");
+            alert("Ticket généré et inscription enregistrée !");
             form.reset();
-
         } catch (err) {
             console.error(err);
-            alert("Erreur lors de la génération : " + err.message);
+            alert("Erreur lors de l'inscription : " + err.message);
         }
     });
 </script>
