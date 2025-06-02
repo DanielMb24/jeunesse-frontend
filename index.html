@@ -18,7 +18,7 @@
 
   <!-- En-tête avec logo et infos -->
   <div class="w-full max-w-4xl flex items-center bg-white bg-opacity-90 rounded-lg p-4 mb-10 shadow-lg">
-    <img src="logo.jpg" alt="Logo MEYINHA" class="h-16 mr-6 object-contain" />
+    <img src="logo.jpg" alt="Logo MEYINHA" id="logoImg" class="h-16 mr-6 object-contain" />
     <div class="flex flex-col space-y-1">
       <span class="font-bold text-lg text-purple-800">MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)</span>
       <span class="text-md text-purple-700 tracking-wide">L'ÉGLISE LOCALE D’AKANDA</span>
@@ -77,6 +77,7 @@
   </div>
 
   <script>
+    // Compte à rebours
     function updateCountdown() {
       const countdownEl = document.getElementById("countdown");
       const now = new Date();
@@ -105,6 +106,7 @@
     const previewContent = document.getElementById("previewContent");
     const downloadBtn = document.getElementById("downloadBtn");
 
+    // Fonction pour télécharger JSON
     function downloadJSON(data, filename) {
       const jsonStr = JSON.stringify(data, null, 2);
       const blob = new Blob([jsonStr], { type: "application/json" });
@@ -118,6 +120,7 @@
       URL.revokeObjectURL(url);
     }
 
+    // Génération QR code en DataURL
     async function generateQRCodeDataURL(text) {
       try {
         return await QRCode.toDataURL(text, { margin: 1, width: 128 });
@@ -151,39 +154,89 @@
 
       downloadBtn.onclick = async () => {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF({
+          orientation: "landscape",
+          unit: "pt",
+          format: "a4"
+        });
 
-        doc.setFontSize(16);
-        doc.text("Ticket - Grande Retraite des Jeunes", 20, 20);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
 
-        let y = 40;
-        const lh = 8;
-        doc.setFontSize(12);
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", 20, y); y += lh;
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", 20, y); y += lh * 2;
+        // Charger le logo en image HTML
+        const logo = document.getElementById("logoImg");
+        // On dessine l'image (convertie en base64) dans le PDF
+        // On utilise canvas temporaire pour récupérer base64
 
-        doc.text(`Nom : ${data.nom}`, 20, y); y += lh;
-        doc.text(`Quartier : ${data.quartier || "-"}`, 20, y); y += lh;
-        doc.text(`Téléphone : ${data.numero || "-"}`, 20, y); y += lh;
-        doc.text(`Présence : ${data.presence}`, 20, y); y += lh;
-        doc.text(`Lieu : Route-stade, en face du CES d'Avorbam`, 20, y); y += lh;
-        doc.text(`Date : Dimanche 16h00 à Lundi 17h00`, 20, y); y += lh;
-        doc.text(`Programme : 24h dans Sa présence`, 20, y); y += lh;
-
-        // Génération du QR code
-        const eventUrl = "evenement.html"; 
-        const qrDataUrl = await generateQRCodeDataURL(eventUrl);
-
-        if (qrDataUrl) {
-          // Ajouter l'image QR code au PDF
-          // x=150, y=20, largeur=40, hauteur=40 (ajuste si besoin)
-          doc.addImage(qrDataUrl, "PNG", 150, 20, 40, 40);
+        function getImageDataUrl(imgElement) {
+          const canvas = document.createElement("canvas");
+          canvas.width = imgElement.naturalWidth;
+          canvas.height = imgElement.naturalHeight;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(imgElement, 0, 0);
+          return canvas.toDataURL("image/png");
         }
+        const logoDataUrl = getImageDataUrl(logo);
 
-        doc.save(`Ticket_${data.nom.replace(/\s+/g, "_")}.pdf`);
-        downloadJSON(data, `Inscription_${data.nom.replace(/\s+/g, "_")}.json`);
+        // Couleurs
+        const violet = "#5B21B6";
 
-        alert("Téléchargement terminé !");
+        // Ajout logo en haut à gauche
+        doc.addImage(logoDataUrl, "PNG", 40, 30, 100, 50);
+
+        // Titre en violet, centré
+        doc.setTextColor(violet);
+        doc.setFontSize(22);
+        doc.setFont("helvetica", "bold");
+        doc.text("Ticket - Grande Retraite des Jeunes", pageWidth / 2, 50, { align: "center" });
+
+        // Sous-titre
+        doc.setFontSize(12);
+        doc.setTextColor("#444");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", 160, 90);
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", 160, 110);
+
+        // Ligne horizontale sous titre
+        doc.setDrawColor(violet);
+        doc.setLineWidth(1);
+        doc.line(40, 120, pageWidth - 40, 120);
+
+        // Détails du participant
+        doc.setFontSize(14);
+        doc.setTextColor("#000");
+        let y = 140;
+        const lh = 22;
+        doc.text(`Nom : ${data.nom}`, 40, y);
+        y += lh;
+        doc.text(`Quartier : ${data.quartier || "-"}`, 40, y);
+        y += lh;
+        doc.text(`Téléphone : ${data.numero || "-"}`, 40, y);
+        y += lh;
+        doc.text(`Présence : ${data.presence}`, 40, y);
+        y += lh;
+        doc.text(`Lieu : Route-stade, en face du CES d'Avorbam`, 40, y);
+        y += lh;
+        doc.text(`Date : Dimanche 16h00 à Lundi 17h00`, 40, y);
+        y += lh;
+        doc.text(`Programme : 24h dans Sa présence`, 40, y);
+
+        // Générer QR code pour URL / info
+        const qrText = `Nom: ${data.nom}, Retraite des Jeunes MEYINHA, Présence: ${data.presence}`;
+        const qrDataUrl = await generateQRCodeDataURL(qrText);
+
+        // Ajouter QR code en bas à droite
+        const qrSize = 100;
+        doc.addImage(qrDataUrl, "PNG", pageWidth - qrSize - 40, pageHeight - qrSize - 40, qrSize, qrSize);
+
+        // Note bas de page
+        doc.setFontSize(10);
+        doc.setTextColor("#666");
+        doc.text("Merci pour votre inscription ! Que Dieu vous bénisse.", 40, pageHeight - 40);
+
+        doc.save("ticket_grande_retraite.pdf");
+
+        // Télécharger aussi les données en JSON
+        downloadJSON(data, "ticket_grande_retraite.json");
       };
     });
   </script>
