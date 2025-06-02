@@ -6,143 +6,151 @@
     <title>Grande Retraite des Jeunes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Roboto font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-purple-700 via-indigo-700 to-blue-700 min-h-screen flex flex-col items-center justify-center p-6 font-sans">
+<body class="bg-gradient-to-r from-purple-600 to-blue-600 min-h-screen flex flex-col items-center justify-center p-6">
 
-<h1 class="text-white text-4xl md:text-5xl font-extrabold mb-12 text-center drop-shadow-lg">
-    24h dans sa présence<br />
-    <span class="text-yellow-300">Grande Retraite des Jeunes</span>
-</h1>
+    <header class="w-full max-w-4xl flex items-center bg-white bg-opacity-90 rounded-lg p-4 mb-10 shadow-lg">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Logo-Eglise.svg/120px-Logo-Eglise.svg.png" alt="Logo MEYINHA" class="h-16 mr-6 object-contain" />
+        <div class="flex flex-col space-y-1">
+            <span class="font-bold text-lg text-purple-800">MINISTERE EYIN-HAQQORE (MEYINHA-HERMON)</span>
+            <span class="text-md text-purple-700 tracking-wide">L'EGLISE LOCALE D’AKANDA</span>
+            <span class="text-md text-purple-700 tracking-wide">DEPARTEMENT JEUNESSE</span>
+        </div>
+    </header>
 
-<div id="countdown" class="text-yellow-300 text-5xl md:text-6xl font-mono mb-14 drop-shadow-md"></div>
+    <h1 class="text-white text-3xl font-bold mb-8 text-center">24h dans sa présence - Grande Retraite des Jeunes</h1>
 
-<form id="inscriptionForm"
-      class="bg-white bg-opacity-90 backdrop-blur-sm p-10 rounded-3xl shadow-2xl max-w-lg w-full space-y-8 border border-purple-300">
+    <div id="countdown" class="text-white text-4xl font-mono mb-10"></div>
 
-    <h2 class="text-2xl font-semibold mb-6 text-center text-purple-800 tracking-wide">
-        Inscription & téléchargement du ticket
-    </h2>
+    <form id="inscriptionForm" class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-md w-full space-y-6">
+        <h2 class="text-xl font-semibold mb-4 text-center">Inscription & téléchargement du ticket</h2>
 
-    <input type="text" name="nom" placeholder="Nom complet" required
-           class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition duration-300 text-gray-800 placeholder-gray-400" />
+        <input type="text" name="nom" placeholder="Nom complet" required
+               class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
 
-    <input type="text" name="quartier" placeholder="Quartier"
-           class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition duration-300 text-gray-800 placeholder-gray-400" />
+        <input type="text" name="quartier" placeholder="Quartier"
+               class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
 
-    <input type="tel" name="numero" placeholder="Numéro de téléphone"
-           class="w-full p-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition duration-300 text-gray-800 placeholder-gray-400" />
+        <input type="tel" name="numero" placeholder="Numéro de téléphone"
+               class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500" />
 
-    <div>
-        <label class="font-semibold block mb-3 text-purple-700 text-lg">Confirmer votre présence :</label>
-        <label class="inline-flex items-center mr-10 cursor-pointer">
-            <input type="radio" name="presence" value="Confirmée" required class="form-radio text-purple-600 focus:ring-purple-500" />
-            <span class="ml-3 text-gray-700 hover:text-purple-700 transition">Oui</span>
-        </label>
-        <label class="inline-flex items-center cursor-pointer">
-            <input type="radio" name="presence" value="Non" class="form-radio text-purple-600 focus:ring-purple-500" />
-            <span class="ml-3 text-gray-700 hover:text-purple-700 transition">Non</span>
-        </label>
-    </div>
+        <div>
+            <label class="font-semibold block mb-1">Confirmer votre présence :</label>
+            <label class="inline-flex items-center mr-6">
+                <input type="radio" name="presence" value="Confirmée" required class="form-radio" />
+                <span class="ml-2">Oui</span>
+            </label>
+            <label class="inline-flex items-center">
+                <input type="radio" name="presence" value="Non" class="form-radio" />
+                <span class="ml-2">Non</span>
+            </label>
+        </div>
 
-    <button type="submit"
-            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-indigo-600 hover:to-purple-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg transition duration-300">
-        Télécharger le ticket PDF & JSON
-    </button>
-</form>
+        <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded font-semibold hover:bg-purple-700 transition">
+            Télécharger le ticket PDF & JSON
+        </button>
+    </form>
 
-<script>
-    // Compte à rebours
-    function updateCountdown() {
-        const countdownEl = document.getElementById("countdown");
-        const now = new Date();
-        const target = new Date(now);
-        target.setHours(17, 0, 0, 0);
+    <script>
+        // Compte à rebours
+        function updateCountdown() {
+            const countdownEl = document.getElementById("countdown");
+            const now = new Date();
+            const target = new Date(now);
+            target.setHours(17, 0, 0, 0);
 
-        const day = target.getDay();
-        if (day !== 0 || now >= target) {
-            const daysUntilSunday = (7 - day) % 7 || 7;
-            target.setDate(now.getDate() + daysUntilSunday);
+            const day = target.getDay();
+            if (day !== 0 || now >= target) {
+                const daysUntilSunday = (7 - day) % 7 || 7;
+                target.setDate(now.getDate() + daysUntilSunday);
+            }
+
+            const diff = target - now;
+            if (diff <= 0) {
+                countdownEl.textContent = "La retraite est en cours ou terminée.";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Fonction pour télécharger un fichier JSON
+        function downloadJSON(data, filename) {
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
         }
 
-        const diff = target - now;
-        if (diff <= 0) {
-            countdownEl.textContent = "La retraite est en cours ou terminée.";
-            return;
-        }
+        // Soumission du formulaire
+        document.getElementById("inscriptionForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
 
-        countdownEl.textContent = `${days}j ${hours}h ${minutes}m ${seconds}s`;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+            if (data.presence !== "Confirmée") {
+                alert("Pour télécharger le ticket, veuillez confirmer votre présence.");
+                return;
+            }
 
-    // Fonction pour télécharger un fichier JSON
-    function downloadJSON(data, filename) {
-        const jsonStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonStr], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    }
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(18);
+                doc.text("Ticket - Grande Retraite des Jeunes", 20, 20);
+                doc.setFontSize(12);
 
-    // Soumission du formulaire
-    document.getElementById("inscriptionForm").addEventListener("submit", async function(e) {
-        e.preventDefault();
+                let y = 40;
+                const lh = 8;
+                doc.text(`Nom complet: ${data.nom}`, 20, y); y += lh;
+                doc.text(`Quartier: ${data.quartier || "-"}`, 20, y); y += lh;
+                doc.text(`Numéro: ${data.numero || "-"}`, 20, y); y += lh;
+                doc.text(`Présence: ${data.presence}`, 20, y); y += lh * 2;
 
-        const form = e.target;
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+                doc.setFontSize(14);
+                doc.text("Programme : 24h dans sa présence", 20, y); y += lh;
+                doc.setFontSize(10);
+                doc.text("Dimanche 16h00 jusqu'au Lundi 17h00", 20, y); y += lh * 2;
 
-        if (data.presence !== "Confirmée") {
-            alert("Pour télécharger le ticket, veuillez confirmer votre présence.");
-            return;
-        }
+                // Suppression du QR code
 
-        try {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text("Ticket - Grande Retraite des Jeunes", 20, 20);
-            doc.setFontSize(12);
+                // Télécharger PDF
+                doc.save(`Ticket_${data.nom.replace(/\s+/g, "_")}.pdf`);
 
-            let y = 40;
-            const lh = 8;
-            doc.text(`Nom complet: ${data.nom}`, 20, y); y += lh;
-            doc.text(`Quartier: ${data.quartier || "-"}`, 20, y); y += lh;
-            doc.text(`Numéro: ${data.numero || "-"}`, 20, y); y += lh;
-            doc.text(`Présence: ${data.presence}`, 20, y); y += lh * 2;
+                // Télécharger JSON
+                downloadJSON(data, `Inscription_${data.nom.replace(/\s+/g, "_")}.json`);
 
-            doc.setFontSize(14);
-            doc.text("Programme : 24h dans sa présence", 20, y); y += lh;
-            doc.setFontSize(10);
-            doc.text("Dimanche 16h00 jusqu'au Lundi 17h00", 20, y); y += lh * 2;
+                alert("Ticket PDF et fichier JSON générés avec succès !");
+                form.reset();
 
-            // Suppression du QR code
-
-            // Télécharger PDF
-            doc.save(`Ticket_${data.nom.replace(/\s+/g, "_")}.pdf`);
-
-            // Télécharger JSON
-            downloadJSON(data, `Inscription_${data.nom.replace(/\s+/g, "_")}.json`);
-
-            alert("Ticket PDF et fichier JSON générés avec succès !");
-            form.reset();
-
-        } catch (err) {
-            console.error(err);
-            alert("Erreur lors de la génération : " + err.message);
-        }
-    });
-</script>
+            } catch (err) {
+                console.error(err);
+                alert("Erreur lors de la génération : " + err.message);
+            }
+        });
+    </script>
 
 </body>
 </html>
