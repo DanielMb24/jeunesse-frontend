@@ -85,10 +85,10 @@
       </div>
     </div>
 
-    <div>
+<!--     <div>
       <label for="photo" class="font-semibold block mb-2 text-purple-700">Photo (optionnelle) :</label>
       <input type="file" id="photo" name="photo" accept="image/*" class="w-full" />
-    </div>
+    </div> -->
   </div>
 
   <div class="text-center mt-6">
@@ -112,8 +112,8 @@
     <h3 class="text-lg font-bold text-center mb-4 text-purple-700">Ticket - Grande Retraite des Jeunes</h3>
     <div id="previewContent">
       <div id="previewInfo" class="text-sm space-y-1"></div>
-      <img id="previewPhoto" alt="Photo du participant" src="" class="hidden" />
-    </div>
+<!--       <img id="previewPhoto" alt="Photo du participant" src="" class="hidden" />
+    </div> -->
 
     <div class="text-center mt-6">
       <button id="downloadBtn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
@@ -150,7 +150,7 @@
 
     const previewContainer = document.getElementById("previewContainer");
     const previewInfo = document.getElementById("previewInfo");
-    const previewPhoto = document.getElementById("previewPhoto");
+    // const previewPhoto = document.getElementById("previewPhoto");
     const downloadBtn = document.getElementById("downloadBtn");
 
     // Lire une image fichier en base64
@@ -173,12 +173,12 @@
         return;
       }
 
-      // Gérer la photo
-      let photoDataUrl = "";
-      const photoFile = formData.get("photo");
-      if (photoFile && photoFile.size > 0) {
-        photoDataUrl = await readFileAsDataURL(photoFile);
-      }
+      // // Gérer la photo
+      // let photoDataUrl = "";
+      // const photoFile = formData.get("photo");
+      // if (photoFile && photoFile.size > 0) {
+      //   photoDataUrl = await readFileAsDataURL(photoFile);
+      // }
 
       // Mise à jour du preview
       previewInfo.innerHTML = `
@@ -271,19 +271,19 @@
         });
 
         // Image à droite si présente
-        if (photoDataUrl) {
-          const img = new Image();
-          img.src = photoDataUrl;
-          img.onload = () => {
-            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-          img.onerror = () => {
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-        } else {
-          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        }
+        // if (photoDataUrl) {
+        //   const img = new Image();
+        //   img.src = photoDataUrl;
+        //   img.onload = () => {
+        //     doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        //   };
+        //   img.onerror = () => {
+        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        //   };
+        // } else {
+        //   doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        // }
       };
       logo.onerror = () => {
         // Si logo non chargé, on continue sans
@@ -322,19 +322,19 @@
           doc.text(line, leftX, y + idx * lineHeight);
         });
 
-        if(photoDataUrl){
-          const img = new Image();
-          img.src = photoDataUrl;
-          img.onload = () => {
-            doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-          img.onerror = () => {
-            doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-          };
-        } else {
-          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        }
+        // if(photoDataUrl){
+        //   const img = new Image();
+        //   img.src = photoDataUrl;
+        //   img.onload = () => {
+        //     doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
+        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        //   };
+        //   img.onerror = () => {
+        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        //   };
+        // } else {
+        //   doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        // }
       };
     }
   </script>
