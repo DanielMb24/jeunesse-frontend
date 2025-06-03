@@ -205,137 +205,78 @@
       downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
     });
 
-    function generatePdf(data, photoDataUrl) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
-      });
+function generatePdf(data, photoDataUrl) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-      // Marges
-      const marginLeft = 40;
-      const marginTop = 40;
-      const marginRigth = 40;
-      let y = marginTop;
+  // Définir les marges et positions
+  const marginLeft = 20;
+  let y = 20;
 
-      // Logo
-      const logo = new Image();
-      logo.src = "logo.jpg";
-      logo.onload = () => {
-        doc.addImage(logo, "JPEG", marginLeft, y, 100, 50);
+  // Logo
+  const logo = document.getElementById("logoImg");
+  if (logo) {
+    const canvas = document.createElement("canvas");
+    canvas.width = logo.naturalWidth;
+    canvas.height = logo.naturalHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(logo, 0, 0);
+    const logoDataURL = canvas.toDataURL("image/jpeg");
 
-        y += 60;
+    doc.addImage(logoDataURL, "JPEG", marginLeft, y, 30, 30);
+  }
 
-        // Texte en haut
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor("#6B46C1");
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginRigth, y);
-        y += 18;
-        doc.setFontSize(12);
-        doc.setTextColor("#553C9A");
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
-        y += 30;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft + 35, y + 8);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft + 35, y + 16);
 
-        // Titre
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor("#6B46C1");
-        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
-        y += 30;
+  y += 40;
 
-        // Infos texte
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor("#000000");
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "bold");
+  doc.text("🎟️ Ticket - Grande Retraite des Jeunes", 70, y);
+  y += 10;
 
-        const leftX = marginLeft;
-        const rightX = 320; // place image à droite
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
 
-        const lineHeight = 18;
+  const lineSpacing = 8;
 
-        // Texte colonne gauche
-        const lines = [
-          `Nom : ${data.nom}`,
-          `Quartier : ${data.quartier || "-"}`,
-          `Téléphone : ${data.numero || "-"}`,
-          `Présence : ${data.presence}`,
-          `Lieu : Route-stade, en face du CES d'Avorbam`,
-          `Date : Dimanche 16h00 à Lundi 17h00`,
-          `Programme : 24h dans Sa présence`
-        ];
+  const fields = [
+    ["Nom :", data.nom],
+    ["Quartier :", data.quartier || "-"],
+    ["Téléphone :", data.numero || "-"],
+    ["Présence :", data.presence],
+    ["Lieu :", "Route-stade, en face du CES d'Avorbam"],
+    ["Date :", "Dimanche 16h00 à Lundi 17h00"],
+    ["Programme :", "24h dans Sa présence"]
+  ];
 
-        lines.forEach((line, idx) => {
-          doc.text(line, leftX, y + idx * lineHeight);
-        });
+  fields.forEach(([label, value]) => {
+    doc.text(`${label} ${value}`, marginLeft, y);
+    y += lineSpacing;
+  });
 
-        // Image à droite si présente
-        // if (photoDataUrl) {
-        //   const img = new Image();
-        //   img.src = photoDataUrl;
-        //   img.onload = () => {
-        //     doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        //   };
-        //   img.onerror = () => {
-        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        //   };
-        // } else {
-        //   doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        // }
-      };
-      logo.onerror = () => {
-        // Si logo non chargé, on continue sans
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.setTextColor("#6B46C1");
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y);
-        y += 18;
-        doc.setFontSize(12);
-        doc.setTextColor("#553C9A");
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y);
-        y += 30;
+  // Si photo disponible
+  if (photoDataUrl) {
+    doc.addImage(photoDataUrl, "JPEG", 140, 40, 40, 40);
+  }
 
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor("#6B46C1");
-        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y);
-        y += 30;
+  // Signature ou remarque
+  y += 10;
+  doc.setDrawColor(150);
+  doc.setLineWidth(0.2);
+  doc.line(marginLeft, y, 190, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.text("Merci pour votre engagement spirituel. Venez dans la joie et la prière !", marginLeft, y);
 
-        const leftX = marginLeft;
-        const rightX = 320;
+  doc.save(`Ticket_Retraite_${data.nom.replace(/\s/g, "_")}.pdf`);
+};
 
-        const lineHeight = 18;
-
-        const lines = [
-          `Nom : ${data.nom}`,
-          `Quartier : ${data.quartier || "-"}`,
-          `Téléphone : ${data.numero || "-"}`,
-          `Présence : ${data.presence}`,
-          `Lieu : Route-stade, en face du CES d'Avorbam`,
-          `Date : Dimanche 16h00 à Lundi 17h00`,
-          `Programme : 24h dans Sa présence`
-        ];
-
-        lines.forEach((line, idx) => {
-          doc.text(line, leftX, y + idx * lineHeight);
-        });
-
-        // if(photoDataUrl){
-        //   const img = new Image();
-        //   img.src = photoDataUrl;
-        //   img.onload = () => {
-        //     doc.addImage(img, "JPEG", rightX, marginTop + 80, 150, 150);
-        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        //   };
-        //   img.onerror = () => {
-        //     doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        //   };
-        // } else {
-        //   doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
-        // }
-      };
     }
   </script>
 </body>
