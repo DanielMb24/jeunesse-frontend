@@ -26,9 +26,6 @@
       gap: 1.5rem;
       align-items: center;
     } 
-    #previewInfo {
-      flex: 1;
-    }
     #previewPhoto {
       width: 120px;
       height: 120px;
@@ -73,6 +70,10 @@
           </label>
         </div>
       </div>
+      <div>
+        <label for="photo" class="font-semibold block mb embarrassed text-purple-700">Photo (optionnelle) :</label>
+        <input type="file" id="photo" name="photo" accept="image/*" class="w-full" />
+      </div>
     </div>
     <div class="text-center mt-6">
       <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded font-semibold hover:bg-purple-700 transition">
@@ -92,6 +93,7 @@
     <h3 class="text-lg font-bold text-center mb-4 text-purple-700">Ticket - Grande Retraite des Jeunes</h3>
     <div id="previewContent">
       <div id="previewInfo" class="text-sm space-y-1"></div>
+      <img id="previewPhoto" alt="Photo du participant" src="" class="hidden" />
     </div>
     <div class="text-center mt-6">
       <button id="downloadBtn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
@@ -127,9 +129,19 @@
 
     const previewContainer = document.getElementById("previewContainer");
     const previewInfo = document.getElementById("previewInfo");
+    const previewPhoto = document.getElementById("previewPhoto");
     const downloadBtn = document.getElementById("downloadBtn");
 
-    document.getElementById("inscriptionForm").addEventListener("submit", function (e) {
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(e);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
@@ -137,6 +149,12 @@
       if (data.presence !== "Confirmée") {
         alert("Veuillez confirmer votre présence pour générer un ticket.");
         return;
+      }
+
+      let photoDataUrl = "";
+      const photoFile = formData.get("photo");
+      if (photoFile && photoFile.size > 0) {
+        photoDataUrl = await readFileAsDataURL(photoFile);
       }
 
       previewInfo.innerHTML = `
@@ -149,12 +167,20 @@
         <p><strong>Programme :</strong> 24h dans Sa présence</p>
       `;
 
+      if (photoDataUrl) {
+        previewPhoto.src = photoDataUrl;
+        previewPhoto.classList.remove("hidden");
+      } else {
+        previewPhoto.src = "";
+        previewPhoto.classList.add("hidden");
+      }
+
       previewContainer.classList.remove("hidden");
 
-      downloadBtn.onclick = () => generatePdf(data);
+      downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
     });
 
-    function generatePdf(data) {
+    function generatePdf(data, photoDataUrl) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({
         orientation: "landscape",
@@ -185,111 +211,139 @@
       logo.src = "logo.jpg";
       logo.onload = () => {
         doc.addImage(logo, "JPEG", marginLeft, y, 80, 40);
-        y += 60; // Space after logo
 
-        // Header text, lowered slightly
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.setTextColor("#6B46C1");
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y, { maxWidth: contentWidth });
-        y += 20;
-        doc.setFontSize(12);
-        doc.setTextColor("#553C9A");
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y, { maxWidth: contentWidth });
-        y += 40; // Additional spacing to lower the text
+        // Photo in top-right corner
+        if (photoDataUrl) {
+          const img = new Image();
+          img.src = photoDataUrl;
+          img.onload = () => {
+            doc.addImage(img, "JPEG", pageWidth - marginLeft - 100, marginTop, 100, 100);
+            renderContent();
+          };
+          img.onerror = () => {
+            renderContent();
+          };
+        } else {
+          renderContent();
+        }
 
-        // Title, centered
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor("#6B46C1");
-        doc.text("Ticket - Grande Retraite des Jeunes", pageWidth / 2, y, { align: "center", maxWidth: contentWidth });
-        y += 40;
+        function renderContent() {
+          y += 60; // Space after logo
 
-        // Decorative line
-        doc.setDrawColor("#6B46C1");
-        doc.setLineWidth(2);
-        doc.line(marginLeft, y, marginLeft + contentWidth, y);
-        y += 20;
+          // Header text, lowered
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(16);
+          doc.setTextColor("#6B46C1");
+          doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y, { maxWidth: contentWidth });
+          y += 20;
+          doc.setFontSize(12);
+          doc.setTextColor("#553C9A");
+          doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y, { maxWidth: contentWidth });
+          y += 40; // Additional spacing
 
-        // Participant information
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor("#000000");
+          // Title, centered
+          doc.setFontSize(18);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor("#6B46C1");
+          doc.text("Ticket - Grande Retraite des Jeunes", pageWidth / 2, y, { align: "center", maxWidth: contentWidth });
+          y += 60; // Increased spacing to lower participant info
 
-        const lines = [
-          `Nom : ${data.nom}`,
-          `Quartier : ${data.quartier || "-"}`,
-          `Téléphone : ${data.numero || "-"}`,
-          `Présence : ${data.presence}`,
-          `Lieu : Route-stade, en face du CES d'Avorbam`,
-          `Date : Dimanche 16h00 à Lundi 17h00`,
-          `Programme : 24h dans Sa présence`
-        ];
+          // Participant information
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor("#000000");
 
-        lines.forEach((line, idx) => {
-          doc.text(line, marginLeft, y + idx * 18, { maxWidth: contentWidth });
-        });
+          const lines = [
+            `Nom : ${data.nom}`,
+            `Quartier : ${data.quartier || "-"}`,
+            `Téléphone : ${data.numero || "-"}`,
+            `Présence : ${data.presence}`,
+            `Lieu : Route-stade, en face du CES d'Avorbam`,
+            `Date : Dimanche 16h00 à Lundi 17h00`,
+            `Programme : 24h dans Sa présence`
+          ];
 
-        y += lines.length * 18 + 20;
+          lines.forEach((line, idx) => {
+            doc.text(line, marginLeft, y + idx * 18, { maxWidth: contentWidth });
+          });
 
-        // Footer
-        doc.setFontSize(10);
-        doc.setTextColor("#553C9A");
-        doc.text("Merci de présenter ce ticket à l'entrée de l'événement.", pageWidth / 2, pageHeight - 40, { align: "center", maxWidth: contentWidth });
+          y += lines.length * 18 + 20;
 
-        // Save PDF
-        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          // Footer
+          doc.setFontSize(10);
+          doc.setTextColor("#553C9A");
+          doc.text("Merci de présenter ce ticket à l'entrée de l'événement.", pageWidth / 2, pageHeight - 40, { align: "center", maxWidth: contentWidth });
+
+          // Save PDF
+          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        }
       };
 
       logo.onerror = () => {
-        // Fallback without logo
         y = marginTop;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(16);
-        doc.setTextColor("#6B46C1");
-        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y, { maxWidth: contentWidth });
-        y += 20;
-        doc.setFontSize(12);
-        doc.setTextColor("#553C9A");
-        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y, { maxWidth: contentWidth });
-        y += 40;
 
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor("#6B46C1");
-        doc.text("Ticket - Grande Retraite des Jeunes", pageWidth / 2, y, { align: "center", maxWidth: contentWidth });
-        y += 40;
+        // Photo in top-right corner
+        if (photoDataUrl) {
+          const img = new Image();
+          img.src = photoDataUrl;
+          img.onload = () => {
+            doc.addImage(img, "JPEG", pageWidth - marginLeft - 100, marginTop, 100, 100);
+            renderContent();
+          };
+          img.onerror = () => {
+            renderContent();
+          };
+        } else {
+          renderContent();
+        }
 
-        doc.setDrawColor("#6B46C1");
-        doc.setLineWidth(2);
-        doc.line(marginLeft, y, marginLeft + contentWidth, y);
-        y += 20;
+        function renderContent() {
+          // Header text, lowered
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(16);
+          doc.setTextColor("#6B46C1");
+          doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y, { maxWidth: contentWidth });
+          y += 20;
+          doc.setFontSize(12);
+          doc.setTextColor("#553C9A");
+          doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y, { maxWidth: contentWidth });
+          y += 40;
 
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor("#000000");
+          // Title, centered
+          doc.setFontSize(18);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor("#6B46C1");
+          doc.text("Ticket - Grande Retraite des Jeunes", pageWidth / 2, y, { align: "center", maxWidth: contentWidth });
+          y += 60; // Increased spacing to lower participant info
 
-        const lines = [
-          `Nom : ${data.nom}`,
-          `Quartier : ${data.quartier || "-"}`,
-          `Téléphone : ${data.numero || "-"}`,
-          `Présence : ${data.presence}`,
-          `Lieu : Route-stade, en face du CES d'Avorbam`,
-          `Date : Dimanche 16h00 à Lundi 17h00`,
-          `Programme : 24h dans Sa présence`
-        ];
+          // Participant information
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor("#000000");
 
-        lines.forEach((line, idx) => {
-          doc.text(line, marginLeft, y + idx * 18, { maxWidth: contentWidth });
-        });
+          const lines = [
+            `Nom : ${data.nom}`,
+            `Quartier : ${data.quartier || "-"}`,
+            `Téléphone : ${data.numero || "-"}`,
+            `Présence : ${data.presence}`,
+            `Lieu : Route-stade, en face du CES d'Avorbam`,
+            `Date : Dimanche 16h00 à Lundi 17h00`,
+            `Programme : 24h dans Sa présence`
+          ];
 
-        y += lines.length * 18 + 20;
+          lines.forEach((line, idx) => {
+            doc.text(line, marginLeft, y + idx * 18, { maxWidth: contentWidth });
+          });
 
-        doc.setFontSize(10);
-        doc.setTextColor("#553C9A");
-        doc.text("Merci de présenter ce ticket à l'entrée de l'événement.", pageWidth / 2, pageHeight - 40, { align: "center", maxWidth: contentWidth });
+          y += lines.length * 18 + 20;
 
-        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+          // Footer
+          doc.setFontSize(10);
+          doc.setTextColor("#553C9A");
+          doc.text("Merci de présenter ce ticket à l'entrée de l'événement.", pageWidth / 2, pageHeight - 40, { align: "center", maxWidth: contentWidth });
+
+          doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+        }
       };
     }
   </script>
