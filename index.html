@@ -9,21 +9,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
-  font-family: 'Roboto', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: start;
-  padding: 2rem;
- background: linear-gradient(to right, #3c1361, #5b2a9d);
-}
-
-    form, #previewContainer {
-    
-       background: #ffffff;
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding: 2rem;
+      background: linear-gradient(to right, #3c1361, #5b2a9d);
     }
-    /* Pour l'affichage du preview avec photo à droite */
+    form, #previewContainer {
+      background: #ffffff;
+    }
     #previewContent {
       display: flex;
       gap: 1.5rem;
@@ -43,8 +40,6 @@
   </style>
 </head>
 <body>
-
-  <!-- En-tête avec logo et infos -->
   <div class="w-full max-w-4xl flex items-center bg-white rounded-lg p-4 mb-10 shadow-lg">
     <img src="logo.jpg" alt="Logo MEYINHA" id="logoImg" class="h-16 mr-6 object-contain" />
     <div class="flex flex-col space-y-1">
@@ -56,50 +51,36 @@
 
   <h1 class="text-white text-3xl font-bold mb-8 text-center">24h dans sa présence - Grande Retraite des Jeunes</h1>
 
-  <!-- Compte à rebours -->
   <div id="countdown" class="text-white text-4xl font-mono mb-10"></div>
 
-  <!-- Formulaire d'inscription -->
-<form id="inscriptionForm" name="inscription" method="POST" data-netlify="true" enctype="multipart/form-data" class="p-8 rounded-lg shadow-lg max-w-3xl w-full bg-white space-y-6">
-<input  name="form-name" value="inscription" />
-  <h2 class="text-2xl font-semibold mb-6 text-center text-purple-700">Formulaire d'inscription</h2>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <input type="text" name="nom" placeholder="Nom complet" required class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
-
-    <input type="text" name="quartier" placeholder="Quartier" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
-
-    <input type="tel" name="numero" placeholder="Numéro de téléphone" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
-
-    <div>
-      <label class="font-semibold block mb-2 text-purple-700">Confirmer votre présence :</label>
-      <div class="flex items-center space-x-4">
-        <label class="inline-flex items-center">
-          <input type="radio" name="presence" value="Confirmée" required class="form-radio text-purple-600" />
-          <span class="ml-2">Oui</span>
-        </label>
-        <label class="inline-flex items-center">
-          <input type="radio" name="presence" value="Non" class="form-radio text-purple-600" />
-          <span class="ml-2">Non</span>
-        </label>
+  <form id="inscriptionForm" name="inscription" method="POST" data-netlify="true" enctype="multipart/form-data" class="p-8 rounded-lg shadow-lg max-w-3xl w-full bg-white space-y-6">
+    <input type="hidden" name="form-name" value="inscription" />
+    <h2 class="text-2xl font-semibold mb-6 text-center text-purple-700">Formulaire d'inscription</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <input type="text" name="nom" placeholder="Nom complet" required class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
+      <input type="text" name="quartier" placeholder="Quartier" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
+      <input type="tel" name="numero" placeholder="Numéro de téléphone" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
+      <div>
+        <label class="font-semibold block mb-2 text-purple-700">Confirmer votre présence :</label>
+        <div class="flex items-center space-x-4">
+          <label class="inline-flex items-center">
+            <input type="radio" name="presence" value="Confirmée" required class="form-radio text-purple-600" />
+            <span class="ml-2">Oui</span>
+          </label>
+          <label class="inline-flex items-center">
+            <input type="radio" name="presence" value="Non" class="form-radio text-purple-600" />
+            <span class="ml-2">Non</span>
+          </label>
+        </div>
       </div>
     </div>
+    <div class="text-center mt-6">
+      <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded font-semibold hover:bg-purple-700 transition">
+        Aperçu du ticket
+      </button>
+    </div>
+  </form>
 
-<!--     <div>
-      <label for="photo" class="font-semibold block mb-2 text-purple-700">Photo (optionnelle) :</label>
-      <input type="file" id="photo" name="photo" accept="image/*" class="w-full" />
-    </div> -->
-  </div>
-
-  <div class="text-center mt-6">
-    <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded font-semibold hover:bg-purple-700 transition">
-      Aperçu du ticket
-    </button>
-  </div>
-</form>
-
-
-  <!-- Aperçu du ticket -->
   <div id="previewContainer" class="hidden mt-10 p-6 rounded-lg shadow-lg max-w-xl w-full text-gray-800">
     <div class="flex items-center mb-4">
       <img src="logo.jpg" alt="Logo MEYINHA" class="h-14 mr-4 object-contain" />
@@ -108,13 +89,10 @@
         <p class="text-purple-700 text-sm">L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE</p>
       </div>
     </div>
-
     <h3 class="text-lg font-bold text-center mb-4 text-purple-700">Ticket - Grande Retraite des Jeunes</h3>
     <div id="previewContent">
       <div id="previewInfo" class="text-sm space-y-1"></div>
-<!--       <img id="previewPhoto" alt="Photo du participant" src="" class="hidden" />
-    </div> -->
-
+    </div>
     <div class="text-center mt-6">
       <button id="downloadBtn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
         Télécharger le ticket PDF
@@ -123,7 +101,6 @@
   </div>
 
   <script>
-    // Compte à rebours
     function updateCountdown() {
       const countdownEl = document.getElementById("countdown");
       const now = new Date();
@@ -150,20 +127,9 @@
 
     const previewContainer = document.getElementById("previewContainer");
     const previewInfo = document.getElementById("previewInfo");
-    // const previewPhoto = document.getElementById("previewPhoto");
     const downloadBtn = document.getElementById("downloadBtn");
 
-    // Lire une image fichier en base64
-    function readFileAsDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = e => reject(e);
-        reader.readAsDataURL(file);
-      });
-    }
-
-    document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
+    document.getElementById("inscriptionForm").addEventListener("submit", function (e) {
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
@@ -173,14 +139,6 @@
         return;
       }
 
-      // // Gérer la photo
-      // let photoDataUrl = "";
-      // const photoFile = formData.get("photo");
-      // if (photoFile && photoFile.size > 0) {
-      //   photoDataUrl = await readFileAsDataURL(photoFile);
-      // }
-
-      // Mise à jour du preview
       previewInfo.innerHTML = `
         <p><strong>Nom :</strong> ${data.nom}</p>
         <p><strong>Quartier :</strong> ${data.quartier || "-"}</p>
@@ -191,92 +149,148 @@
         <p><strong>Programme :</strong> 24h dans Sa présence</p>
       `;
 
-      if(photoDataUrl){
-        previewPhoto.src = photoDataUrl;
-        previewPhoto.classList.remove("hidden");
-      } else {
-        previewPhoto.src = "";
-        previewPhoto.classList.add("hidden");
-      }
-
       previewContainer.classList.remove("hidden");
 
-      // Génération PDF quand on clique
-      downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
+      downloadBtn.onclick = () => generatePdf(data);
     });
 
-function generatePdf(data, photoDataUrl) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+    function generatePdf(data) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "pt",
+        format: "a4",
+      });
 
-  // Définir les marges et positions
-  const marginLeft = 20;
-  let y = 20;
+      // Constants for layout
+      const marginLeft = 40;
+      const marginTop = 40;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const contentWidth = pageWidth - 2 * marginLeft;
 
-  // Logo
-  const logo = document.getElementById("logoImg");
-  if (logo) {
-    const canvas = document.createElement("canvas");
-    canvas.width = logo.naturalWidth;
-    canvas.height = logo.naturalHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(logo, 0, 0);
-    const logoDataURL = canvas.toDataURL("image/jpeg");
+      // Background gradient
+      doc.setFillColor(245, 243, 255); // Light purple background
+      doc.rect(0, 0, pageWidth, pageHeight, "F");
 
-    doc.addImage(logoDataURL, "JPEG", marginLeft, y, 30, 30);
-  }
+      // Border
+      doc.setDrawColor(107, 70, 193); // Purple border
+      doc.setLineWidth(4);
+      doc.rect(marginLeft - 10, marginTop - 10, contentWidth + 20, pageHeight - 60, "S");
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft + 35, y + 8);
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft + 35, y + 16);
+      let y = marginTop;
 
-  y += 40;
+      // Logo
+      const logo = new Image();
+      logo.src = "logo.jpg";
+      logo.onload = () => {
+        doc.addImage(logo, "JPEG", marginLeft, y, 80, 40);
+        y += 50;
 
-  doc.setFontSize(13);
-  doc.setFont("helvetica", "bold");
-  doc.text("🎟️ Ticket - Grande Retraite des Jeunes", 70, y);
-  y += 10;
+        // Header text
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor("#6B46C1");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y, { maxWidth: contentWidth });
+        y += 20;
+        doc.setFontSize(12);
+        doc.setTextColor("#553C9A");
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y, { maxWidth: contentWidth });
+        y += 30;
 
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
+        // Title
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor("#6B46C1");
+        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y, { align: "center", maxWidth: contentWidth });
+        y += 40;
 
-  const lineSpacing = 8;
+        // Decorative line
+        doc.setDrawColor("#6B46C1");
+        doc.setLineWidth(2);
+        doc.line(marginLeft, y, marginLeft + contentWidth, y);
+        y += 20;
 
-  const fields = [
-    ["Nom :", data.nom],
-    ["Quartier :", data.quartier || "-"],
-    ["Téléphone :", data.numero || "-"],
-    ["Présence :", data.presence],
-    ["Lieu :", "Route-stade, en face du CES d'Avorbam"],
-    ["Date :", "Dimanche 16h00 à Lundi 17h00"],
-    ["Programme :", "24h dans Sa présence"]
-  ];
+        // Participant information
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor("#000000");
 
-  fields.forEach(([label, value]) => {
-    doc.text(`${label} ${value}`, marginLeft, y);
-    y += lineSpacing;
-  });
+        const lines = [
+          `Nom : ${data.nom}`,
+          `Quartier : ${data.quartier || "-"}`,
+          `Téléphone : ${data.numero || "-"}`,
+          `Présence : ${data.presence}`,
+          `Lieu : Route-stade, en face du CES d'Avorbam`,
+          `Date : Dimanche 16h00 à Lundi 17h00`,
+          `Programme : 24h dans Sa présence`
+        ];
 
-  // Si photo disponible
-  if (photoDataUrl) {
-    doc.addImage(photoDataUrl, "JPEG", 140, 40, 40, 40);
-  }
+        lines.forEach((line, idx) => {
+          doc.text(line, marginLeft, y + idx * 18, { maxWidth: contentWidth });
+        });
 
-  // Signature ou remarque
-  y += 10;
-  doc.setDrawColor(150);
-  doc.setLineWidth(0.2);
-  doc.line(marginLeft, y, 190, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.text("Merci pour votre engagement spirituel. Venez dans la joie et la prière !", marginLeft, y);
+        y += lines.length * 18 + 20;
 
-  doc.save(`Ticket_Retraite_${data.nom.replace(/\s/g, "_")}.pdf`);
-};
+        // Footer
+        doc.setFontSize(10);
+        doc.setTextColor("#553C9A");
+        doc.text("Merci de présenter ce ticket à l'entrée de l'événement.", marginLeft, pageHeight - 40, { align: "center", maxWidth: contentWidth });
 
+        // Save PDF
+        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+      };
+
+      logo.onerror = () => {
+        // Fallback without logo
+        y = marginTop;
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor("#6B46C1");
+        doc.text("MINISTÈRE EYIN-HAQQORE (MEYINHA-HERMON)", marginLeft, y, { maxWidth: contentWidth });
+        y += 20;
+        doc.setFontSize(12);
+        doc.setTextColor("#553C9A");
+        doc.text("L'ÉGLISE LOCALE D’AKANDA - DÉPARTEMENT JEUNESSE", marginLeft, y, { maxWidth: contentWidth });
+        y += 30;
+
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor("#6B46C1");
+        doc.text("Ticket - Grande Retraite des Jeunes", marginLeft, y, { align: "center", maxWidth: contentWidth });
+        y += 40;
+
+        doc.setDrawColor("#6B46C1");
+        doc.setLineWidth(2);
+        doc.line(marginLeft, y, marginLeft + contentWidth, y);
+        y += 20;
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor("#000000");
+
+        const lines = [
+          `Nom : ${data.nom}`,
+          `Quartier : ${data.quartier || "-"}`,
+          `Téléphone : ${data.numero || "-"}`,
+          `Présence : ${data.presence}`,
+          `Lieu : Route-stade, en face du CES d'Avorbam`,
+          `Date : Dimanche 16h00 à Lundi 17h00`,
+          `Programme : 24h dans Sa présence`
+        ];
+
+        lines.forEach((line, idx) => {
+          doc.text(line, marginLeft, y + idx * 18, { maxWidth: contentWidth });
+        });
+
+        y += lines.length * 18 + 20;
+
+        doc.setFontSize(10);
+        doc.setTextColor("#553C9A");
+        doc.text("Merci de présenter ce ticket à l'entrée de l'événement.", marginLeft, pageHeight - 40, { align: "center", maxWidth: contentWidth });
+
+        doc.save(`Ticket_${data.nom.replace(/\s/g, "_")}.pdf`);
+      };
     }
   </script>
 </body>
