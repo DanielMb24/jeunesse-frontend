@@ -50,8 +50,9 @@
 
   <div id="countdown" class="text-white text-4xl font-mono mb-10"></div>
 
-  <form id="inscriptionForm" name="inscription" method="POST" data-netlify="true" enctype="multipart/form-data" class="p-8 rounded-lg shadow-lg max-w-3xl w-full bg-white space-y-6">
+  <form id="inscriptionForm" name="inscription" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" enctype="multipart/form-data" class="p-8 rounded-lg shadow-lg max-w-3xl w-full bg-white space-y-6">
     <input type="hidden" name="form-name" value="inscription" />
+    <input type="text" name="bot-field" style="display:none" />
     <h2 class="text-2xl font-semibold mb-6 text-center text-purple-700">Formulaire d'inscription</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <input type="text" name="nom" placeholder="Nom complet" required class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-purple-600 focus:outline-none" />
@@ -71,12 +72,14 @@
         </div>
       </div>
       <div>
-        <label for="photo" class="font-semibold block mb embarrassed text-purple-700">Photo (optionnelle) :</label>
+        <label for="photo" class="font-semibold block mb-2 text-purple-700">Photo (optionnelle) :</label>
         <input type="file" id="photo" name="photo" accept="image/*" class="w-full" />
       </div>
     </div>
     <div class="text-center mt-6">
-      <button type="submit" class="bg-purple-600 text-white px-8 py-3 rounded font-semibold hover:bg-purple-700 transition">
+      <button type="submit" class="bg-purple-600 text-white px造型
+
+System: white px-8 py-3 rounded font-semibold hover:bg-purple-700 transition">
         Aperçu du ticket
       </button>
     </div>
@@ -143,7 +146,8 @@
 
     document.getElementById("inscriptionForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const formData = new FormData(e.target);
+      const form = e.target;
+      const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
       if (data.presence !== "Confirmée") {
@@ -176,6 +180,25 @@
       }
 
       previewContainer.classList.remove("hidden");
+
+      // Soumettre les données à Netlify
+      try {
+        const response = await fetch("/", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (response.ok) {
+          console.log("Formulaire envoyé avec succès à Netlify !");
+          alert("Inscription envoyée avec succès !");
+        } else {
+          console.error("Erreur lors de l'envoi du formulaire à Netlify.");
+          alert("Erreur lors de l'envoi de l'inscription.");
+        }
+      } catch (error) {
+        console.error("Erreur réseau :", error);
+        alert("Erreur réseau lors de l'envoi.");
+      }
 
       downloadBtn.onclick = () => generatePdf(data, photoDataUrl);
     });
